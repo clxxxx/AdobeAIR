@@ -51,9 +51,9 @@ class UserListActivity : AppCompatActivity() {
         findViewById<Button>(R.id.register).setOnClickListener {
             val editDialog = EditDialog(this)
             editDialog.setMessage("请输入用户名")
-            editDialog.setInterface(object : DialogInterface{
-
-            })
+//            editDialog.setInterface(object : DialogInterface{
+//
+//            })
             editDialog.show()
         }
         findViewById<Button>(R.id.create_group).setOnClickListener {

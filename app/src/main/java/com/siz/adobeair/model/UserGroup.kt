@@ -9,7 +9,5 @@ import io.realm.annotations.PrimaryKey
  * @time 2023/5/23 14:37
  */
 open class UserGroup (@PrimaryKey
-                 var id: Long = 0,
-                 var groupName: String = ""): RealmObject(){
-
-}
+                      var id: Long = 0,
+                      var groupName: String = ""): RealmObject()

@@ -4,86 +4,349 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
-    android:padding="5dp">
+    android:padding="5dp"
+    tools:context=".MainActivity">
 
     <Button
         android:id="@+id/open_new"
+        style="@style/myButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="新建/打开"
-        style="@style/myButton"
+        app:layout_constraintEnd_toStartOf="@+id/convergence_set"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/convergence"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/convergence"
+        android:id="@+id/convergence_set"
+        style="@style/myButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
         android:text="会聚设置"
-        style="@style/myButton"
-        android:layout_marginStart="20dp"
+        app:layout_constraintEnd_toStartOf="@+id/add_convergence"
         app:layout_constraintStart_toEndOf="@+id/open_new"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/add"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/add"
+        android:id="@+id/add_convergence"
+        style="@style/myButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
         android:text="增加"
-        style="@style/myButton"
-        android:layout_marginStart="20dp"
-        app:layout_constraintStart_toEndOf="@+id/convergence"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/reduce"/>
+        app:layout_constraintEnd_toStartOf="@+id/reduce_convergence"
+        app:layout_constraintStart_toEndOf="@+id/convergence_set"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/reduce"
+        android:id="@+id/reduce_convergence"
+        style="@style/myButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
         android:text="减少"
-        style="@style/myButton"
-        android:layout_marginStart="20dp"
-        app:layout_constraintStart_toEndOf="@+id/add"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/confirm"/>
+        app:layout_constraintEnd_toStartOf="@+id/confirm_convergence"
+        app:layout_constraintStart_toEndOf="@+id/add_convergence"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/confirm"
+        android:id="@+id/confirm_convergence"
+        style="@style/myButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="确定"
-        style="@style/myButton"
         android:layout_marginStart="20dp"
-        app:layout_constraintStart_toEndOf="@+id/reduce"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/add_img"/>
+        android:text="确定"
+        app:layout_constraintEnd_toStartOf="@+id/add_img"
+        app:layout_constraintStart_toEndOf="@+id/reduce_convergence"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/add_img"
+        style="@style/myButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="加图"
-        style="@style/myButton"
         android:layout_marginStart="20dp"
-        app:layout_constraintStart_toEndOf="@+id/confirm"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/binocular_vision"/>
+        android:text="加图"
+        app:layout_constraintEnd_toStartOf="@+id/binocular_vision"
+        app:layout_constraintStart_toEndOf="@+id/confirm_convergence"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/binocular_vision"
+        style="@style/myButton"
         android:layout_width="120dp"
         android:layout_height="wrap_content"
-        android:text="双视眼"
-        style="@style/myButton"
         android:layout_marginStart="20dp"
+        android:text="双视眼"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/add_img"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/choose_video"
+        style="@style/myButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="选择视频"
+        app:layout_constraintEnd_toStartOf="@+id/outreach_set"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/open_new" />
+
+    <Button
+        android:id="@+id/outreach_set"
+        style="@style/myButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:text="外展设置"
+        app:layout_constraintEnd_toStartOf="@+id/add_outreach"
+        app:layout_constraintStart_toEndOf="@+id/choose_video"
+        app:layout_constraintTop_toBottomOf="@+id/open_new" />
+
+    <Button
+        android:id="@+id/add_outreach"
+        style="@style/myButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:text="增加"
+        app:layout_constraintEnd_toStartOf="@+id/reduce_outreach"
+        app:layout_constraintStart_toEndOf="@+id/outreach_set"
+        app:layout_constraintTop_toBottomOf="@+id/open_new" />
+
+    <Button
+        android:id="@+id/reduce_outreach"
+        style="@style/myButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:text="减少"
+        app:layout_constraintEnd_toStartOf="@+id/confirm_outreach"
+        app:layout_constraintStart_toEndOf="@+id/add_outreach"
+        app:layout_constraintTop_toBottomOf="@+id/open_new" />
+
+    <Button
+        android:id="@+id/confirm_outreach"
+        style="@style/myButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:text="确定"
+        app:layout_constraintEnd_toStartOf="@+id/swapping"
+        app:layout_constraintStart_toEndOf="@+id/reduce_outreach"
+        app:layout_constraintTop_toBottomOf="@+id/open_new" />
+
+    <Button
+        android:id="@+id/swapping"
+        style="@style/myButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:text="换图"
+        app:layout_constraintEnd_toStartOf="@+id/query"
+        app:layout_constraintStart_toEndOf="@+id/confirm_outreach"
+        app:layout_constraintTop_toBottomOf="@+id/open_new" />
+
+    <Button
+        android:id="@+id/query"
+        style="@style/myButton"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:text="查询"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/swapping"
+        app:layout_constraintTop_toBottomOf="@+id/open_new" />
+
+    <com.siz.adobeair.EmptyControlVideo
+        android:id="@+id/video_top"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="10dp"
+        android:background="@color/white"
+        app:layout_constraintBottom_toTopOf="@+id/guideline"
+        app:layout_constraintDimensionRatio="1:0.6"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/query" />
+
+    <com.siz.adobeair.EmptyControlVideo
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="20dp"
+        android:background="@color/white"
+        app:layout_constraintBottom_toTopOf="@+id/continued"
+        app:layout_constraintDimensionRatio="1:0.6"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/guideline" />
 
 
+    <TextView
+        android:id="@+id/Individual_training"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="单项训练:"
+        android:textColor="@color/white"
+        android:textSize="15sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/convergence"
+        app:layout_constraintEnd_toStartOf="@+id/convergence"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/convergence"
+        style="@style/myButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:text="会聚"
+        app:layout_constraintBottom_toTopOf="@+id/end"
+        app:layout_constraintEnd_toStartOf="@+id/outreach"
+        app:layout_constraintStart_toEndOf="@+id/Individual_training" />
+
+    <Button
+        android:id="@+id/outreach"
+        style="@style/myButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:text="外展"
+        app:layout_constraintBottom_toTopOf="@+id/end"
+        app:layout_constraintEnd_toStartOf="@+id/flexible"
+        app:layout_constraintStart_toEndOf="@+id/convergence" />
+
+    <Button
+        android:id="@+id/flexible"
+        style="@style/myButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:text="灵活"
+        app:layout_constraintBottom_toTopOf="@+id/end"
+        app:layout_constraintEnd_toStartOf="@+id/limit"
+        app:layout_constraintStart_toEndOf="@+id/outreach" />
+
+    <Button
+        android:id="@+id/limit"
+        style="@style/myButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:text="极限"
+        app:layout_constraintBottom_toTopOf="@+id/end"
+        app:layout_constraintEnd_toStartOf="@+id/accelerate"
+        app:layout_constraintStart_toEndOf="@+id/flexible" />
+
+    <Button
+        android:id="@+id/accelerate"
+        style="@style/myButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:text="加速"
+        app:layout_constraintBottom_toTopOf="@+id/end"
+        app:layout_constraintEnd_toStartOf="@+id/continued"
+        app:layout_constraintStart_toEndOf="@+id/limit" />
+
+    <Button
+        android:id="@+id/continued"
+        style="@style/myButton"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:text="继续"
+        app:layout_constraintBottom_toTopOf="@+id/end"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/accelerate" />
+
+    <TextView
+        android:id="@+id/combination_training"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="组合训练:"
+        android:textColor="@color/white"
+        android:textSize="15sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/jijilingji"
+        app:layout_constraintEnd_toStartOf="@+id/jijilingji"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/jijilingji"
+        style="@style/myButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:text="极极灵极"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/waiwaiwailing"
+        app:layout_constraintStart_toEndOf="@+id/combination_training" />
+
+    <Button
+        android:id="@+id/waiwaiwailing"
+        style="@style/myButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:text="外外外灵"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/waiwailingji"
+        app:layout_constraintStart_toEndOf="@+id/jijilingji" />
+
+    <Button
+        android:id="@+id/waiwailingji"
+        style="@style/myButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:text="外外灵极"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/huihuilingji"
+        app:layout_constraintStart_toEndOf="@+id/waiwaiwailing" />
+
+    <Button
+        android:id="@+id/huihuilingji"
+        style="@style/myButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:text="会会灵极"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/moderate"
+        app:layout_constraintStart_toEndOf="@+id/waiwailingji" />
+
+    <Button
+        android:id="@+id/moderate"
+        style="@style/myButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:text="减速"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/end"
+        app:layout_constraintStart_toEndOf="@+id/huihuilingji" />
+
+    <Button
+        android:id="@+id/end"
+        style="@style/myButton"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:text="结束"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/moderate" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.5" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

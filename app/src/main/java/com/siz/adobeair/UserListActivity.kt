@@ -7,10 +7,12 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.gyf.barlibrary.BarHide
-import com.gyf.barlibrary.ImmersionBar
+import com.chad.library.adapter.base.BaseQuickAdapter
+import com.gyf.immersionbar.BarHide
+import com.gyf.immersionbar.ImmersionBar
 import com.siz.adobeair.model.User
 import com.siz.adobeair.model.UserGroup
 import io.realm.Realm
@@ -26,6 +28,9 @@ open class UserListActivity : AppCompatActivity() {
 
     private lateinit var realm: Realm
 
+    private var register : Button? =null
+    private var createGroup : Button? =null
+    private var edit : Button? =null
     private lateinit var userGroup : RecyclerView
     private lateinit var users : RecyclerView
     private lateinit var userGroupAdapter: UserGroupAdapter
@@ -38,7 +43,7 @@ open class UserListActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_user_list)
-        ImmersionBar.with(this).fullScreen(true).hideBar(BarHide.FLAG_HIDE_BAR).init()
+        ImmersionBar.with(this).hideBar(BarHide.FLAG_HIDE_STATUS_BAR).init()
         imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         userGroup = findViewById(R.id.user_group)
         userGroup.layoutManager = LinearLayoutManager(this)
@@ -55,8 +60,20 @@ open class UserListActivity : AppCompatActivity() {
         userAdapter = UserAdapter()
         userAdapter.bindToRecyclerView(users)
         userAdapter.setNewData(userList)
-
-        findViewById<Button>(R.id.register).setOnClickListener {
+        userAdapter.setOnItemClickListener { _, _, position ->
+            intent.putExtra("user",userList[position])
+            setResult(RESULT_OK, intent)
+            finish()
+        }
+//        userAdapter.setOnItemLongClickListener{ _, _, position ->
+//
+//
+//            return@setOnItemLongClickListener true
+//        }
+//        val itemTouchHelper = ItemTouchHelper(MyItemTouchHelperCallBack())
+//        itemTouchHelper.attachToRecyclerView(users)
+        register = findViewById(R.id.register)
+        register?.setOnClickListener {
             val editDialog = EditDialog(this, "请输入用户名")
             editDialog.setInterface(object : EditDialog.DialogInterface {
                 override fun onConfirm(editText: String) {
@@ -76,7 +93,8 @@ open class UserListActivity : AppCompatActivity() {
             })
             editDialog.show()
         }
-        findViewById<Button>(R.id.create_group).setOnClickListener {
+        createGroup = findViewById(R.id.create_group)
+        createGroup?.setOnClickListener {
             val editDialog = EditDialog(this, "请输入文件夹名")
             editDialog.setInterface(object : EditDialog.DialogInterface {
                 override fun onConfirm(editText: String) {
@@ -96,8 +114,17 @@ open class UserListActivity : AppCompatActivity() {
             })
             editDialog.show()
         }
-        findViewById<Button>(R.id.edit).setOnClickListener {
-
+        edit = findViewById(R.id.edit)
+        edit?.setOnClickListener {
+            if (register!!.isEnabled){
+                edit?.text = "取消编辑"
+                register?.isEnabled = false
+                createGroup?.isEnabled = false
+            } else {
+                edit?.text = "编辑"
+                register?.isEnabled = true
+                createGroup?.isEnabled = true
+            }
         }
         findViewById<Button>(R.id.close).setOnClickListener {
             finish()

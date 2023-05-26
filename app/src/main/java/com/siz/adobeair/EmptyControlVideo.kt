@@ -14,15 +14,14 @@ import com.shuyu.gsyvideoplayer.video.StandardGSYVideoPlayer
  */
 class EmptyControlVideo(context: Context, attrs: AttributeSet) : StandardGSYVideoPlayer(context, attrs) {
 
-    private val mContext: Context = context
     private lateinit var img : ImageView
 
     override fun getLayoutId(): Int {
         return R.layout.empty_control_video
     }
 
-    init {
-        super.init(mContext)
+    override fun init(context: Context) {
+        super.init(context)
         img = findViewById(R.id.img)
     }
 

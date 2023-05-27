@@ -1,6 +1,7 @@
 package com.siz.adobeair
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.widget.ImageView
@@ -40,6 +41,9 @@ class EmptyControlVideo(context: Context, attrs: AttributeSet) : StandardGSYVide
         //不需要双击暂停
     }
 
-
+    fun setImgSrc(bm : Bitmap){
+        img.visibility = VISIBLE
+        img.setImageBitmap(bm)
+    }
 
 }

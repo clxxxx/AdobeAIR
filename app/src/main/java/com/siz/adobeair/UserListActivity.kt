@@ -76,6 +76,10 @@ open class UserListActivity : AppCompatActivity() {
             editDialog.setInterface(object : EditDialog.DialogInterface {
                 override fun onConfirm(editText: String) {
                     if (!TextUtils.isEmpty(editText) && editText.length > 1) {
+                        if (realm.where<User>().equalTo("name", editText).count() > 0){
+                            editDialog.setErrorMessage("用户已存在")
+                            return
+                        }
                         hiddenKeyboard(editDialog.getEditText())
                         realm.executeTransaction { realm ->
                             val user = realm.createObject<User>(userList.size)
@@ -97,6 +101,10 @@ open class UserListActivity : AppCompatActivity() {
             editDialog.setInterface(object : EditDialog.DialogInterface {
                 override fun onConfirm(editText: String) {
                     if (!TextUtils.isEmpty(editText) && editText.length > 1) {
+                        if (realm.where<UserGroup>().equalTo("groupName", editText).count() > 0){
+                            editDialog.setErrorMessage("文件夹已存在")
+                            return
+                        } 
                         hiddenKeyboard(editDialog.getEditText())
                         realm.executeTransaction { realm ->
                             val userGroup = realm.createObject<UserGroup>(userGroupList.size)

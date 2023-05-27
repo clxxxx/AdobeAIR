@@ -2,7 +2,10 @@ package com.siz.adobeair
 
 import android.Manifest
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.os.Environment
 import android.text.TextUtils
 import android.util.Log
 import android.view.animation.Animation
@@ -19,6 +22,10 @@ import kotlin.system.exitProcess
 
 
 class MainActivity : AppCompatActivity() {
+
+    companion object{
+        val path = Environment.getExternalStorageDirectory().absolutePath + "OPT1"
+    }
 
     private var convergenceSet : Button? = null
     private var addConvergence : Button? = null
@@ -45,8 +52,12 @@ class MainActivity : AppCompatActivity() {
     private var huihuilingji : Button? = null
     private var moderate : Button? = null
     private var end : Button? = null
+
     private var setValue : TextView? = null
-    private var videoPlayer : EmptyControlVideo? = null
+
+    private var videoPlayerTop : EmptyControlVideo? = null
+    private var videoPlayerBot : EmptyControlVideo? = null
+
     private var user : User? =null
 
     private var speed : Long = 6000
@@ -120,6 +131,11 @@ class MainActivity : AppCompatActivity() {
         }
         swapping = findViewById(R.id.swapping)
         query = findViewById(R.id.query)
+        query?.setOnClickListener {
+            val intent = Intent(this, ValueRecordActivity::class.java)
+            intent.putExtra("userId", user?.id)
+            startActivity(intent)
+        }
         convergence = findViewById(R.id.convergence)
         outreach = findViewById(R.id.outreach)
         flexible = findViewById(R.id.flexible)
@@ -128,7 +144,7 @@ class MainActivity : AppCompatActivity() {
         accelerate?.setOnClickListener {
             speed -= 200
             topAnimation?.duration = speed
-            Log.e("++++++++++",speed.toString())
+            Log.e("++++++++++", speed.toString())
         }
         continued = findViewById(R.id.continued)
         jijilingji = findViewById(R.id.jijilingji)
@@ -144,27 +160,41 @@ class MainActivity : AppCompatActivity() {
 
         PermissionX.init(this)
             .permissions(
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.READ_EXTERNAL_STORAGE)
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.READ_EXTERNAL_STORAGE)
             .request { allGranted, _, _ ->
                 if (!allGranted) {
                     exitForce()
+                } else {
+                    val opt = File(path)
+                    if (!opt.exists()){
+                        opt.mkdir()
+                        val sys = File(opt.absolutePath, "sys")
+                        sys.mkdir()
+                        val systemImage = File(opt.absolutePath, "systemImage")
+                        systemImage.mkdir()
+                        val video = File(opt.absolutePath, "video")
+                        video.mkdir()
+                        val videoImage = File(opt.absolutePath, "videoImage")
+                        videoImage.mkdir()
+                    }
                 }
             }
 
-        val url = "/storage/emulated/legacy/OPT/009 保镖_高清.flv"
-        if(File("/storage/emulated/legacy/OPT/009 保镖_高清.flv").exists()){
-            Log.d("+++++++++++++", url)
-        }
-        videoPlayer = findViewById(R.id.video_top)
-        videoPlayer?.setUp(url, false, "")
-        videoPlayer?.startPlayLogic()
-
-        topAnimation = TranslateAnimation(0f,-200f,0f,0f)
-        topAnimation?.duration = speed
-        topAnimation?.repeatCount = Animation.INFINITE
-        topAnimation?.repeatMode = Animation.REVERSE
-        videoPlayer?.startAnimation(topAnimation)
+//        val url = "/storage/emulated/legacy/OPT/009 保镖_高清.flv"
+//        if(File("/storage/emulated/legacy/OPT/009 保镖_高清.flv").exists()){
+//            Log.d("+++++++++++++", url)
+//        }
+        videoPlayerTop = findViewById(R.id.video_top)
+        videoPlayerBot = findViewById(R.id.video_bot)
+//        videoPlayer?.setUp(url, false, "")
+//        videoPlayer?.startPlayLogic()
+//
+//        topAnimation = TranslateAnimation(0f, -200f, 0f, 0f)
+//        topAnimation?.duration = speed
+//        topAnimation?.repeatCount = Animation.INFINITE
+//        topAnimation?.repeatMode = Animation.REVERSE
+//        videoPlayer?.startAnimation(topAnimation)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -191,12 +221,12 @@ class MainActivity : AppCompatActivity() {
             waiwaiwailing?.isEnabled = true
             waiwailingji?.isEnabled = true
             huihuilingji?.isEnabled = true
+            videoPlayerTop?.setImgSrc(getBitmap("/systemImage/kaishi.jpg"))
+            videoPlayerBot?.setImgSrc(getBitmap("/systemImage/kaishi.jpg"))
         }
-        accelerate?.isEnabled = true
-        moderate?.isEnabled = true
     }
 
-    private fun setValue(value : Int){
+    private fun setValue(value: Int){
         val convergence = user?.setValues?.get(0)!!.convergence
         val outreach = user?.setValues?.get(0)!!.outreach
         if (addConvergence!!.isEnabled){
@@ -210,6 +240,10 @@ class MainActivity : AppCompatActivity() {
     private fun exitForce() {
         finish()
         exitProcess(0)
+    }
+
+    private fun getBitmap(name : String): Bitmap{
+        return BitmapFactory.decodeFile(path+name)
     }
 
     override fun onDestroy() {

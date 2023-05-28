@@ -41,9 +41,14 @@ class EmptyControlVideo(context: Context, attrs: AttributeSet) : StandardGSYVide
         //不需要双击暂停
     }
 
-    fun setImgSrc(bm : Bitmap){
+    fun setImgSrc(bm : Bitmap?){
+        if (bm == null) return
         img.visibility = VISIBLE
         img.setImageBitmap(bm)
+    }
+
+    fun setInVisibleImg(){
+        img.visibility = GONE
     }
 
 }

@@ -2,6 +2,7 @@ package com.siz.adobeair
 
 import android.os.Bundle
 import android.widget.Button
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -26,6 +27,7 @@ class ValueRecordActivity : AppCompatActivity() {
         val id = intent?.getIntExtra("userId", 0)
         val realm = Realm.getDefaultInstance()
         val user = realm.where<User>().equalTo("id", id).findFirst()
+        findViewById<TextView>(R.id.user_name).text = "当前用户  " + user?.name
         val record = findViewById<RecyclerView>(R.id.record)
         record.layoutManager = LinearLayoutManager(this)
         val recordAdapter = RecordAdapter()

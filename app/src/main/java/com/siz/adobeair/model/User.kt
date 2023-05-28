@@ -16,36 +16,6 @@ open class User(@PrimaryKey var id: Long = 0,
                 var groupId: Long = 0,
                 var videoName: String? = "",
                 var videoProgress: Long = 0,
-                var setValues: RealmList<SetValue> = RealmList()): RealmObject(), Parcelable {
-    constructor(parcel: Parcel) : this(
-        parcel.readLong(),
-        parcel.readString(),
-        parcel.readLong(),
-        parcel.readString(),
-        parcel.readLong(),
-    )
-
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeLong(id)
-        parcel.writeString(name)
-        parcel.writeLong(groupId)
-        parcel.writeString(videoName)
-        parcel.writeLong(videoProgress)
-    }
-
-    override fun describeContents(): Int {
-        return 0
-    }
-
-    companion object CREATOR : Parcelable.Creator<User> {
-        override fun createFromParcel(parcel: Parcel): User {
-            return User(parcel)
-        }
-
-        override fun newArray(size: Int): Array<User?> {
-            return arrayOfNulls(size)
-        }
-    }
-
+                var setValues: RealmList<SetValue> = RealmList()): RealmObject(){
 
 }

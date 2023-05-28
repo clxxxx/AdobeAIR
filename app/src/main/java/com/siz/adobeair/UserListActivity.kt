@@ -59,7 +59,7 @@ open class UserListActivity : AppCompatActivity() {
         userAdapter.bindToRecyclerView(users)
         userAdapter.setNewData(userList)
         userAdapter.setOnItemClickListener { _, _, position ->
-            intent.putExtra("user",userList[position])
+            intent.putExtra("id",userList[position].id)
             setResult(RESULT_OK, intent)
             finish()
         }

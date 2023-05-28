@@ -187,7 +187,7 @@
         android:layout_height="wrap_content"
         android:textSize="15sp"
         android:visibility="invisible"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="10dp"
         android:textColor="@color/white"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -195,26 +195,19 @@
 
     <com.siz.adobeair.EmptyControlVideo
         android:id="@+id/video_top"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginTop="10dp"
+        android:layout_width="190dp"
+        android:layout_height="118dp"
         android:layout_marginBottom="10dp"
-        android:background="@color/white"
         app:layout_constraintBottom_toTopOf="@+id/guideline"
-        app:layout_constraintDimensionRatio="1:0.56"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/set_value" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <com.siz.adobeair.EmptyControlVideo
         android:id="@+id/video_bot"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="190dp"
+        android:layout_height="118dp"
         android:layout_marginTop="10dp"
-        android:layout_marginBottom="35dp"
         android:background="@color/white"
-        app:layout_constraintBottom_toTopOf="@+id/continued"
-        app:layout_constraintDimensionRatio="1:0.56"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/guideline" />

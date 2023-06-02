@@ -10,6 +10,7 @@ import android.text.TextUtils
 import android.util.Log
 import android.view.View
 import android.view.animation.Animation
+import android.view.animation.AnimationSet
 import android.view.animation.TranslateAnimation
 import android.widget.Button
 import android.widget.TextView
@@ -18,6 +19,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import com.gyf.immersionbar.BarHide
 import com.gyf.immersionbar.ImmersionBar
 import com.permissionx.guolindev.PermissionX
+import com.shuyu.gsyvideoplayer.video.base.GSYVideoView
 import com.siz.adobeair.model.SetValue
 import com.siz.adobeair.model.User
 import io.realm.Realm
@@ -68,7 +70,7 @@ class MainActivity : AppCompatActivity() {
 
     private var convergenceValue: Int = 0
     private var outreachValue: Int = 0
-    private var speed: Long = 6000
+    private var speed: Long = 4000
     private var topAnimation: TranslateAnimation? = null
     private var botAnimation: TranslateAnimation? = null
 
@@ -179,34 +181,78 @@ class MainActivity : AppCompatActivity() {
         }
         convergence = findViewById(R.id.convergence)
         convergence?.setOnClickListener {
-//            topAnimation = TranslateAnimation(0f, -200f, 0f, 0f)
-//            topAnimation?.duration = speed
-//            topAnimation?.repeatCount = Animation.INFINITE
-//            topAnimation?.repeatMode = Animation.REVERSE
-//            videoPlayerTop?.startAnimation(topAnimation)
-            videoPlayerTop?.setInVisibleImg()
-            videoPlayerBot?.setInVisibleImg()
-            videoPlayerTop?.isAutoFullWithSize  = true
-            videoPlayerTop?.setUp(videoPath, false, "")
-            videoPlayerBot?.setUp(videoPath, false, "")
-            videoPlayerTop?.startPlayLogic()
+            if (convergence!!.isSelected) return@setOnClickListener
+            restoreButtonState()
+            convergence?.isSelected = true
+//            videoPlayerTop?.setInVisibleImg()
+//            videoPlayerBot?.setInVisibleImg()
+//            videoPlayerTop?.setUp(videoPath, false, "")
+//            videoPlayerBot?.setUp(videoPath, false, "")
+//            videoPlayerTop?.startPlayLogic()
 //            videoPlayerBot?.startPlayLogic()
-//            videoPlayerTop.
+            startAnimation(-100f,100f, 15)
         }
         outreach = findViewById(R.id.outreach)
         outreach?.setOnClickListener {
+            if (outreach!!.isSelected) return@setOnClickListener
+            restoreButtonState()
+            outreach?.isSelected = true
+            startAnimation(100f,-100f, 15)
         }
         flexible = findViewById(R.id.flexible)
         flexible?.setOnClickListener {
+            if (outreach!!.isSelected) return@setOnClickListener
+            restoreButtonState()
+            outreach?.isSelected = true
+            startAnimation(100f,-100f, 15)
         }
         limit = findViewById(R.id.limit)
         limit?.setOnClickListener {
+            if (limit!!.isSelected) return@setOnClickListener
+            restoreButtonState()
+            limit?.isSelected = true
+            videoPlayerTop?.clearAnimation()
+            videoPlayerBot?.clearAnimation()
+            topAnimation = TranslateAnimation(0f, -100f, 0f, 0f)
+            topAnimation?.duration = speed / 2
+            topAnimation?.fillAfter = true
+            topAnimation?.isFillEnabled = true
+            topAnimation?.setAnimationListener(object :Animation.AnimationListener{
+                override fun onAnimationStart(p0: Animation?) {
+                }
+
+                override fun onAnimationEnd(p0: Animation?) {
+                    topAnimation = TranslateAnimation(-100f, 100f, 0f, 0f)
+                    topAnimation?.duration = speed
+                    topAnimation?.repeatCount = 15
+                    topAnimation?.repeatMode = Animation.REVERSE
+                    videoPlayerTop?.startAnimation(topAnimation)
+                    botAnimation = TranslateAnimation(100f, -100f, 0f, 0f)
+                    botAnimation?.duration = speed
+                    botAnimation?.repeatCount = 15
+                    botAnimation?.repeatMode = Animation.REVERSE
+                    videoPlayerBot?.startAnimation(botAnimation)
+                }
+
+                override fun onAnimationRepeat(p0: Animation?) {
+
+                }
+
+            })
+            videoPlayerTop?.startAnimation(topAnimation)
+            botAnimation = TranslateAnimation(0f, 100f, 0f, 0f)
+            botAnimation?.duration = speed / 2
+            topAnimation?.fillAfter = true
+            topAnimation?.isFillEnabled = true
+            videoPlayerBot?.startAnimation(botAnimation)
         }
         accelerate = findViewById(R.id.accelerate)
         accelerate?.setOnClickListener {
-            speed -= 200
-            topAnimation?.duration = speed
-            Log.e("++++++++++", speed.toString())
+            if (speed > 500) {
+                speed -= 500
+                topAnimation?.restrictDuration(speed)
+                botAnimation?.restrictDuration(speed)
+            }
         }
         continued = findViewById(R.id.continued)
         continued?.setOnClickListener {
@@ -225,8 +271,9 @@ class MainActivity : AppCompatActivity() {
         }
         moderate = findViewById(R.id.moderate)
         moderate?.setOnClickListener {
-            speed += 200
-            topAnimation?.duration = speed
+            speed += 500
+            topAnimation?.restrictDuration(speed)
+            botAnimation?.restrictDuration(speed)
         }
         end = findViewById(R.id.end)
         end?.setOnClickListener {
@@ -258,6 +305,33 @@ class MainActivity : AppCompatActivity() {
         videoPlayerTop = findViewById(R.id.video_top)
         videoPlayerBot = findViewById(R.id.video_bot)
         realm = Realm.getDefaultInstance()
+        videoPlayerTop?.setGSYVideoProgressListener { _, _, currentPosition, _ ->
+            Log.e("currentPosition", currentPosition.toString())
+        }
+
+
+        videoPlayerTop?.setGSYStateUiListener { state ->
+            when(state){
+                GSYVideoView.CURRENT_STATE_PLAYING->{
+                    //开始播放
+                    //            topAnimation = TranslateAnimation(0f, -200f, 0f, 0f)
+//            topAnimation?.duration = speed
+//            topAnimation?.repeatCount = Animation.INFINITE
+//            topAnimation?.repeatMode = Animation.REVERSE
+//            videoPlayerTop?.startAnimation(topAnimation)
+                }
+                GSYVideoView.CURRENT_STATE_PAUSE->{
+                    //播放暂停
+
+                }
+                GSYVideoView.CURRENT_STATE_AUTO_COMPLETE->{
+                    //播放结束
+
+                }
+            }
+        }
+
+        playVideoUiState()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -304,6 +378,8 @@ class MainActivity : AppCompatActivity() {
         waiwaiwailing?.isEnabled = true
         waiwailingji?.isEnabled = true
         huihuilingji?.isEnabled = true
+        accelerate?.isEnabled = true
+        moderate?.isEnabled = true
         videoPlayerTop?.setImgSrc(getBitmap("/systemImage/kaishi.jpg"))
         videoPlayerBot?.setImgSrc(getBitmap("/systemImage/kaishi.jpg"))
     }
@@ -349,6 +425,34 @@ class MainActivity : AppCompatActivity() {
             layoutParamsBot.marginEnd = dip2px(outreachValue /2 * 3.8f)
             videoPlayerBot?.layoutParams = layoutParamsBot
         }
+    }
+
+    private fun restoreButtonState(){
+        convergence?.isSelected = false
+        outreach?.isSelected = false
+        flexible?.isSelected = false
+        limit?.isSelected = false
+        jijilingji?.isSelected = false
+        waiwaiwailing?.isSelected = false
+        waiwailingji?.isSelected = false
+        huihuilingji?.isSelected = false
+        accelerate?.isSelected = false
+        moderate?.isSelected = false
+    }
+
+    private fun startAnimation(topX: Float, botX: Float, repeatCount : Int){
+        videoPlayerTop?.clearAnimation()
+        videoPlayerBot?.clearAnimation()
+        topAnimation = TranslateAnimation(0f, topX, 0f, 0f)
+        topAnimation?.duration = speed
+        topAnimation?.repeatCount = repeatCount
+        topAnimation?.repeatMode = Animation.REVERSE
+        videoPlayerTop?.startAnimation(topAnimation)
+        botAnimation = TranslateAnimation(0f, botX, 0f, 0f)
+        botAnimation?.duration = speed
+        botAnimation?.repeatCount = repeatCount
+        botAnimation?.repeatMode = Animation.REVERSE
+        videoPlayerBot?.startAnimation(botAnimation)
     }
 
     private fun getBitmap(name: String): Bitmap? {

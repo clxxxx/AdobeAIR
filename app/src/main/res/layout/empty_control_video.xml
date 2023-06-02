@@ -6,7 +6,7 @@
 
     <FrameLayout
         android:id="@+id/surface_container"
-        android:layout_width="match_parent"
+        android:layout_width="380dp"
         android:layout_height="match_parent"
         android:gravity="center">
 
@@ -17,7 +17,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="fitXY"
-        android:visibility="gone"/>
+        android:src="@drawable/kaishi"/>
 
 
 </RelativeLayout>

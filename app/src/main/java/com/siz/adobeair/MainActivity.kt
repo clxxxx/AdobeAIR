@@ -10,7 +10,6 @@ import android.text.TextUtils
 import android.util.Log
 import android.view.View
 import android.view.animation.Animation
-import android.view.animation.AnimationSet
 import android.view.animation.TranslateAnimation
 import android.widget.Button
 import android.widget.TextView
@@ -62,15 +61,16 @@ class MainActivity : AppCompatActivity() {
     private var end: Button? = null
 
     private var setValue: TextView? = null
-
     private var videoPlayerTop: EmptyControlVideo? = null
     private var videoPlayerBot: EmptyControlVideo? = null
+
     private var videoPath : String? = null
+    private var mSetValue : SetValue? = null
     private var user: User? = null
 
     private var convergenceValue: Int = 0
     private var outreachValue: Int = 0
-    private var speed: Long = 4000
+    private var speed: Long = 5000
     private var topAnimation: TranslateAnimation? = null
     private var botAnimation: TranslateAnimation? = null
 
@@ -161,6 +161,14 @@ class MainActivity : AppCompatActivity() {
             realm.executeTransaction {
                 val u = realm.where<User>().equalTo("id", user?.id).findFirst()
                 val value = realm.createObject<SetValue>()
+                if (mSetValue != null){
+                    if (convergenceValue == 0){
+                        convergenceValue = mSetValue?.convergence!!
+                    }
+                    if (outreachValue == 0){
+                        outreachValue = mSetValue?.outreach!!
+                    }
+                }
                 value.convergence = convergenceValue
                 value.outreach = outreachValue
                 value.setTime = System.currentTimeMillis()
@@ -184,27 +192,27 @@ class MainActivity : AppCompatActivity() {
             if (convergence!!.isSelected) return@setOnClickListener
             restoreButtonState()
             convergence?.isSelected = true
-//            videoPlayerTop?.setInVisibleImg()
-//            videoPlayerBot?.setInVisibleImg()
-//            videoPlayerTop?.setUp(videoPath, false, "")
-//            videoPlayerBot?.setUp(videoPath, false, "")
-//            videoPlayerTop?.startPlayLogic()
+            videoPlayerTop?.setInVisibleImg()
+            videoPlayerBot?.setInVisibleImg()
+            videoPlayerTop?.setUp(videoPath, false, "")
+            videoPlayerBot?.setUp(videoPath, false, "")
+            videoPlayerTop?.startPlayLogic()
 //            videoPlayerBot?.startPlayLogic()
-            startAnimation(-100f,100f, 15)
+//            startAnimation(-100f,100f, 15)
         }
         outreach = findViewById(R.id.outreach)
         outreach?.setOnClickListener {
             if (outreach!!.isSelected) return@setOnClickListener
             restoreButtonState()
             outreach?.isSelected = true
-            startAnimation(100f,-100f, 15)
+            startAnimation(100f, -100f, 15)
         }
         flexible = findViewById(R.id.flexible)
         flexible?.setOnClickListener {
             if (outreach!!.isSelected) return@setOnClickListener
             restoreButtonState()
             outreach?.isSelected = true
-            startAnimation(100f,-100f, 15)
+            startAnimation(100f, -100f, 15)
         }
         limit = findViewById(R.id.limit)
         limit?.setOnClickListener {
@@ -217,7 +225,7 @@ class MainActivity : AppCompatActivity() {
             topAnimation?.duration = speed / 2
             topAnimation?.fillAfter = true
             topAnimation?.isFillEnabled = true
-            topAnimation?.setAnimationListener(object :Animation.AnimationListener{
+            topAnimation?.setAnimationListener(object : Animation.AnimationListener {
                 override fun onAnimationStart(p0: Animation?) {
                 }
 
@@ -304,6 +312,11 @@ class MainActivity : AppCompatActivity() {
 
         videoPlayerTop = findViewById(R.id.video_top)
         videoPlayerBot = findViewById(R.id.video_bot)
+        Log.e("+++++++++++","000000000")
+        videoPlayerTop?.playTag = "videoPlayerTop"
+        videoPlayerTop?.playPosition = 1
+        videoPlayerBot?.playTag = "videoPlayerBot"
+        videoPlayerBot?.playPosition = 2
         realm = Realm.getDefaultInstance()
         videoPlayerTop?.setGSYVideoProgressListener { _, _, currentPosition, _ ->
             Log.e("currentPosition", currentPosition.toString())
@@ -312,7 +325,7 @@ class MainActivity : AppCompatActivity() {
 
         videoPlayerTop?.setGSYStateUiListener { state ->
             when(state){
-                GSYVideoView.CURRENT_STATE_PLAYING->{
+                GSYVideoView.CURRENT_STATE_PLAYING -> {
                     //开始播放
                     //            topAnimation = TranslateAnimation(0f, -200f, 0f, 0f)
 //            topAnimation?.duration = speed
@@ -320,18 +333,16 @@ class MainActivity : AppCompatActivity() {
 //            topAnimation?.repeatMode = Animation.REVERSE
 //            videoPlayerTop?.startAnimation(topAnimation)
                 }
-                GSYVideoView.CURRENT_STATE_PAUSE->{
+                GSYVideoView.CURRENT_STATE_PAUSE -> {
                     //播放暂停
 
                 }
-                GSYVideoView.CURRENT_STATE_AUTO_COMPLETE->{
+                GSYVideoView.CURRENT_STATE_AUTO_COMPLETE -> {
                     //播放结束
 
                 }
             }
         }
-
-        playVideoUiState()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -362,6 +373,7 @@ class MainActivity : AppCompatActivity() {
         chooseVideo?.isEnabled = true
         query?.isEnabled = true
         if ((user?.setValues != null && user?.setValues!!.size > 0 && !TextUtils.isEmpty(videoPath)) || user?.videoProgress!! > 0){
+            mSetValue = user?.setValues!![0]
             playVideoUiState()
         }
         if (!TextUtils.isEmpty(videoPath)) {
@@ -378,8 +390,6 @@ class MainActivity : AppCompatActivity() {
         waiwaiwailing?.isEnabled = true
         waiwailingji?.isEnabled = true
         huihuilingji?.isEnabled = true
-        accelerate?.isEnabled = true
-        moderate?.isEnabled = true
         videoPlayerTop?.setImgSrc(getBitmap("/systemImage/kaishi.jpg"))
         videoPlayerBot?.setImgSrc(getBitmap("/systemImage/kaishi.jpg"))
     }
@@ -412,7 +422,7 @@ class MainActivity : AppCompatActivity() {
             layoutParamsTop.marginEnd = dip2px(convergenceValue / 2 * 3.8f)
             videoPlayerTop?.layoutParams = layoutParamsTop
             val layoutParamsBot =  videoPlayerBot?.layoutParams as ConstraintLayout.LayoutParams
-            layoutParamsBot.marginStart = dip2px(convergenceValue /2 * 3.8f)
+            layoutParamsBot.marginStart = dip2px(convergenceValue / 2 * 3.8f)
             videoPlayerBot?.layoutParams = layoutParamsBot
         }
         if (addOutreach!!.isEnabled) {
@@ -422,7 +432,7 @@ class MainActivity : AppCompatActivity() {
             videoPlayerTop?.layoutParams = layoutParamsTop
             val layoutParamsBot =  videoPlayerBot?.layoutParams as ConstraintLayout.LayoutParams
             layoutParamsBot.marginStart = 0
-            layoutParamsBot.marginEnd = dip2px(outreachValue /2 * 3.8f)
+            layoutParamsBot.marginEnd = dip2px(outreachValue / 2 * 3.8f)
             videoPlayerBot?.layoutParams = layoutParamsBot
         }
     }
@@ -440,7 +450,7 @@ class MainActivity : AppCompatActivity() {
         moderate?.isSelected = false
     }
 
-    private fun startAnimation(topX: Float, botX: Float, repeatCount : Int){
+    private fun startAnimation(topX: Float, botX: Float, repeatCount: Int){
         videoPlayerTop?.clearAnimation()
         videoPlayerBot?.clearAnimation()
         topAnimation = TranslateAnimation(0f, topX, 0f, 0f)
@@ -464,6 +474,16 @@ class MainActivity : AppCompatActivity() {
         return (dipValue * scale + 0.5f).toInt()
     }
 
+    override fun onResume() {
+        super.onResume()
+        CustomManager.onResumeAll()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        CustomManager.onPauseAll()
+    }
+
     private fun exitForce() {
         finish()
         exitProcess(0)
@@ -471,5 +491,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        CustomManager.clearAllVideo()
     }
 }

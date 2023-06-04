@@ -1,11 +1,12 @@
 package com.siz.adobeair
 
 import android.app.Application
-import com.shuyu.gsyvideoplayer.player.IjkPlayerManager
-import com.shuyu.gsyvideoplayer.utils.GSYVideoType
 import io.realm.Realm
 import io.realm.RealmConfiguration
-import tv.danmaku.ijk.media.player.IjkMediaPlayer
+import xyz.doikki.videoplayer.BuildConfig
+import xyz.doikki.videoplayer.ijk.IjkPlayerFactory
+import xyz.doikki.videoplayer.player.VideoViewConfig
+import xyz.doikki.videoplayer.player.VideoViewManager
 
 /**
  *
@@ -21,10 +22,14 @@ class AdobeAIRApplication : Application() {
             .allowWritesOnUiThread(true).name("test.realm").build()
         Realm.setDefaultConfiguration(configuration)
 
-        //ijk关闭log
-        IjkPlayerManager.setLogLevel(IjkMediaPlayer.IJK_LOG_SILENT)
-        GSYVideoType.setShowType(GSYVideoType.SCREEN_MATCH_FULL)
-//        GSYVideoType.setRenderType(GSYVideoType.SUFRACE)
+        //播放器配置，注意：此为全局配置，按需开启
+        VideoViewManager.setConfig(
+            VideoViewConfig.newBuilder()
+                .setLogEnabled(BuildConfig.DEBUG) //调试的时候请打开日志，方便排错
+                .setPlayerFactory(IjkPlayerFactory.create())
+                .build()
+        )
+
     }
 
 }

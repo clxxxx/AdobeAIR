@@ -12,4 +12,6 @@
     <color name="btn_unable">#717171</color>
     <color name="bg">#ECECEC</color>
 
+    <color name="video_bg">#191919</color>
+
 </resources>

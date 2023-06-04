@@ -77,14 +77,14 @@
         <Button
             android:id="@+id/register"
             android:layout_width="100dp"
-            android:layout_height="32dp"
+            android:layout_height="35dp"
             android:text="注册新用户"
             style="@style/myButton" />
 
         <Button
             android:id="@+id/create_group"
             android:layout_width="100dp"
-            android:layout_height="32dp"
+            android:layout_height="35dp"
             android:text="创建文件夹"
             android:layout_marginStart="20dp"
             style="@style/myButton" />
@@ -92,7 +92,7 @@
         <Button
             android:id="@+id/edit"
             android:layout_width="100dp"
-            android:layout_height="32dp"
+            android:layout_height="35dp"
             android:text="编辑"
             android:layout_marginStart="20dp"
             style="@style/myButton"  />
@@ -100,7 +100,7 @@
         <Button
             android:id="@+id/close"
             android:layout_width="100dp"
-            android:layout_height="32dp"
+            android:layout_height="35dp"
             android:text="关闭"
             android:layout_marginStart="20dp"
             style="@style/myButton"  />

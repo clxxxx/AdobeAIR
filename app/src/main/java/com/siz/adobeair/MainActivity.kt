@@ -2,14 +2,12 @@ package com.siz.adobeair
 
 import android.Manifest
 import android.animation.*
-import android.animation.ValueAnimator.RESTART
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.os.Environment
 import android.text.TextUtils
-import android.util.Log
 import android.view.View
 import android.view.animation.LinearInterpolator
 import android.widget.Button
@@ -25,7 +23,6 @@ import com.siz.adobeair.model.User
 import io.realm.Realm
 import io.realm.kotlin.createObject
 import io.realm.kotlin.where
-import kotlinx.coroutines.flow.FlowCollector
 import xyz.doikki.videoplayer.player.VideoView
 import java.io.File
 import kotlin.system.exitProcess
@@ -708,6 +705,11 @@ class MainActivity : AppCompatActivity() {
         topAnimation.start()
         botAnimation.start()
     }
+
+
+
+
+
 
     private fun getBitmap(name: String): Bitmap? {
         return BitmapFactory.decodeFile(PATH + name)

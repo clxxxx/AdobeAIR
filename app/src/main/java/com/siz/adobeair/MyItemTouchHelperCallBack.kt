@@ -1,5 +1,6 @@
 package com.siz.adobeair
 
+import android.util.Log
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 
@@ -13,6 +14,8 @@ class MyItemTouchHelperCallBack : ItemTouchHelper.Callback() {
     override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
         val form = viewHolder.adapterPosition
         val to = target.adapterPosition
+
+        Log.d("+++++++++++","00000000000000")
 
         var isMove = false
 //        //AlbumPanoramaAdapter拖拽的适配器

@@ -12,6 +12,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.gyf.immersionbar.BarHide
@@ -83,35 +84,35 @@ open class UserListActivity : AppCompatActivity() {
             setResult(RESULT_OK, intent)
             finish()
         }
-        userAdapter.setOnItemLongClickListener{ _, _, position ->
-            userName?.text = userList[position].name
-            userName?.visibility = View.VISIBLE
-            info?.setOnTouchListener { _, motionEvent ->
-                when (motionEvent.action){
-                    MotionEvent.ACTION_DOWN -> {
-                        startLocal[0] = motionEvent.rawX.toInt()
-                        startLocal[1] = motionEvent.rawY.toInt()
-                    }
-                    MotionEvent.ACTION_MOVE -> {
-                        val newLocal = IntArray(2)
-                        newLocal[0] = motionEvent.rawX.toInt()
-                        newLocal[1] = motionEvent.rawY.toInt()
-                        userName?.layout(motionEvent.rawX.toInt()-(userName?.width!! / 2),
-                            motionEvent.rawY.toInt()-(userName?.height!! / 2),
-                            motionEvent.rawX.toInt()+(userName?.width!! / 2),
-                            motionEvent.rawY.toInt()+(userName?.height!! / 2),)
-
-                    }
-                    MotionEvent.ACTION_UP -> {
-
-                    }
-                }
-                return@setOnTouchListener true
-            }
-            return@setOnItemLongClickListener true
-        }
-//        val itemTouchHelper = ItemTouchHelper(MyItemTouchHelperCallBack())
-//        itemTouchHelper.attachToRecyclerView(users)
+//        userAdapter.setOnItemLongClickListener{ _, _, position ->
+//            userName?.text = userList[position].name
+//            userName?.visibility = View.VISIBLE
+//            info?.setOnTouchListener { _, motionEvent ->
+//                when (motionEvent.action){
+//                    MotionEvent.ACTION_DOWN -> {
+//                        startLocal[0] = motionEvent.rawX.toInt()
+//                        startLocal[1] = motionEvent.rawY.toInt()
+//                    }
+//                    MotionEvent.ACTION_MOVE -> {
+//                        val newLocal = IntArray(2)
+//                        newLocal[0] = motionEvent.rawX.toInt()
+//                        newLocal[1] = motionEvent.rawY.toInt()
+//                        userName?.layout(motionEvent.rawX.toInt()-(userName?.width!! / 2),
+//                            motionEvent.rawY.toInt()-(userName?.height!! / 2),
+//                            motionEvent.rawX.toInt()+(userName?.width!! / 2),
+//                            motionEvent.rawY.toInt()+(userName?.height!! / 2),)
+//
+//                    }
+//                    MotionEvent.ACTION_UP -> {
+//
+//                    }
+//                }
+//                return@setOnTouchListener true
+//            }
+//            return@setOnItemLongClickListener true
+//        }
+        val itemTouchHelper = ItemTouchHelper(MyItemTouchHelperCallBack())
+        itemTouchHelper.attachToRecyclerView(users)
         register = findViewById(R.id.register)
         register?.setOnClickListener {
             val editDialog = EditDialog(this, "请输入用户名")

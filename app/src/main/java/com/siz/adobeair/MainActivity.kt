@@ -5,15 +5,19 @@ import android.animation.*
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.text.TextUtils
+import android.util.Log
 import android.view.View
 import android.view.animation.LinearInterpolator
 import android.widget.Button
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.animation.addListener
 import androidx.core.content.ContextCompat
 import com.gyf.immersionbar.BarHide
 import com.gyf.immersionbar.ImmersionBar
@@ -70,7 +74,6 @@ class MainActivity : AppCompatActivity() {
 
     private var convergenceValue: Int = 0
     private var outreachValue: Int = 0
-    private var speed: Long = 5000
     private lateinit var topAnimation: ObjectAnimator
     private lateinit var botAnimation: ObjectAnimator
 
@@ -78,6 +81,12 @@ class MainActivity : AppCompatActivity() {
     private var img2Position = 0
     private var imgListPath1 = mutableListOf<String>()
     private var imgListPath2 = mutableListOf<String>()
+
+    private lateinit var topAnimationSet : AnimatorSet
+    private lateinit var botAnimationSet : AnimatorSet
+
+    private lateinit var cruTopAnimation : ObjectAnimator
+    private lateinit var cruBotAnimation : ObjectAnimator
 
     private lateinit var realm: Realm
 
@@ -244,10 +253,12 @@ class MainActivity : AppCompatActivity() {
         }
         accelerate = findViewById(R.id.accelerate)
         accelerate?.setOnClickListener {
+            Log.d("++++++++++",cruTopAnimation.duration.toString())
+            var speed = cruTopAnimation.duration
             if (speed > 500) {
                 speed -= 500
-                topAnimation.duration = speed
-                botAnimation.duration = speed
+                cruTopAnimation.duration = speed
+                cruBotAnimation.duration = speed
             }
         }
         continued = findViewById(R.id.continued)
@@ -255,16 +266,26 @@ class MainActivity : AppCompatActivity() {
             if (videoPlayerTop?.player!!.isPlaying){
                 videoPlayerTop?.player!!.pause()
                 videoPlayerBot?.player!!.pause()
-                topAnimation.pause()
-                botAnimation.pause()
+                if (topAnimation.isRunning){
+                    topAnimation.pause()
+                    botAnimation.pause()
+                } else {
+                    topAnimationSet.pause()
+                    botAnimationSet.pause()
+                }
                 continued?.text = "继续"
                 accelerate?.isEnabled = false
                 moderate?.isEnabled = false
             } else {
                 videoPlayerTop?.player!!.resume()
                 videoPlayerBot?.player!!.resume()
-                topAnimation.resume()
-                botAnimation.resume()
+                if (topAnimation.isPaused){
+                    topAnimation.resume()
+                    botAnimation.resume()
+                } else {
+                    topAnimationSet.resume()
+                    botAnimationSet.resume()
+                }
                 continued?.text = "暂停"
                 accelerate?.isEnabled = true
                 moderate?.isEnabled = true
@@ -272,30 +293,50 @@ class MainActivity : AppCompatActivity() {
         }
         jijilingji = findViewById(R.id.jijilingji)
         jijilingji?.setOnClickListener {
-
+            if (jijilingji!!.isSelected) return@setOnClickListener
+            restoreButtonState()
+            jijilingji?.isSelected = true
+            startjijilingji()
         }
         waiwaiwailing = findViewById(R.id.waiwaiwailing)
         waiwaiwailing?.setOnClickListener {
-
+            if (waiwaiwailing!!.isSelected) return@setOnClickListener
+            restoreButtonState()
+            waiwaiwailing?.isSelected = true
+            startwaiwaiwailing()
         }
         waiwailingji = findViewById(R.id.waiwailingji)
         waiwailingji?.setOnClickListener {
-
+            if (waiwailingji!!.isSelected) return@setOnClickListener
+            restoreButtonState()
+            waiwailingji?.isSelected = true
+            startwaiwailingji()
         }
         huihuilingji = findViewById(R.id.huihuilingji)
         huihuilingji?.setOnClickListener {
-
+            if (huihuilingji!!.isSelected) return@setOnClickListener
+            restoreButtonState()
+            huihuilingji?.isSelected = true
+            starthuihuilingji()
         }
         moderate = findViewById(R.id.moderate)
         moderate?.setOnClickListener {
+            Log.d("++++++++++",cruTopAnimation.duration.toString())
+            var speed = cruTopAnimation.duration
             speed += 500
-            topAnimation.duration = speed
-            botAnimation.duration = speed
+            cruTopAnimation.duration = speed
+            cruBotAnimation.duration = speed
         }
         end = findViewById(R.id.end)
         end?.setOnClickListener {
-            topAnimation.end()
-            botAnimation.end()
+            if (topAnimation.isStarted){
+                topAnimation.end()
+                botAnimation.end()
+            }
+            if (topAnimationSet.isStarted){
+                topAnimationSet.end()
+                botAnimationSet.end()
+            }
             playVideoUiState(false)
             videoPlayerTop?.setImgSrc(getBitmap("/systemImage/jieshu.jpg"))
             videoPlayerBot?.setImgSrc(getBitmap("/systemImage/jieshu.jpg"))
@@ -410,6 +451,10 @@ class MainActivity : AppCompatActivity() {
             topAnimation.end()
             botAnimation.end()
         }
+        if (topAnimationSet.isStarted){
+            topAnimationSet.end()
+            botAnimationSet.end()
+        }
         videoPlayerTop?.player!!.release()
         videoPlayerBot?.player!!.release()
         val layoutParamsTop =  videoPlayerTop?.layoutParams as ConstraintLayout.LayoutParams
@@ -520,8 +565,14 @@ class MainActivity : AppCompatActivity() {
                 R.color.video_bg
             )
         )
-        topAnimation.cancel()
-        botAnimation.cancel()
+        if (topAnimation.isStarted){
+            topAnimation.end()
+            botAnimation.end()
+        }
+        if (topAnimationSet.isStarted){
+            topAnimationSet.end()
+            botAnimationSet.end()
+        }
         videoPlayerTop?.setInVisibleImg()
         videoPlayerBot?.setInVisibleImg()
         if (videoPlayerTop?.player!!.currentPlayState == VideoView.STATE_IDLE){
@@ -575,6 +626,27 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initAnimation(){
+        topAnimationSet = AnimatorSet()
+        topAnimationSet.interpolator = LinearInterpolator()
+        topAnimationSet.addListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationRepeat(animation: Animator) {
+                super.onAnimationRepeat(animation)
+                cruTopAnimation = animation as ObjectAnimator
+            }
+
+            override fun onAnimationEnd(animation: Animator) {
+                super.onAnimationEnd(animation)
+                stopPlayVideo()
+            }
+        })
+        botAnimationSet = AnimatorSet()
+        botAnimationSet.interpolator = LinearInterpolator()
+        botAnimationSet.addListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationRepeat(animation: Animator) {
+                super.onAnimationRepeat(animation)
+                cruBotAnimation = animation as ObjectAnimator
+            }
+        })
         topAnimation = ObjectAnimator()
         topAnimation.target = videoPlayerTop
         topAnimation.setPropertyName("translationX")
@@ -593,32 +665,211 @@ class MainActivity : AppCompatActivity() {
 
     private fun startConvergence(){
         startPlayVideo()
-        speed = 10000
         topAnimation.setFloatValues(0f, (convergenceValue * -1).toFloat(), 0f)
-        topAnimation.duration = speed
+        topAnimation.duration = 10000
         topAnimation.repeatCount = 15
         botAnimation.setFloatValues(0f, convergenceValue.toFloat(), 0f)
-        botAnimation.duration = speed
+        botAnimation.duration = 10000
         botAnimation.repeatCount = 15
         topAnimation.start()
         botAnimation.start()
+        cruTopAnimation = topAnimation
+        cruBotAnimation = botAnimation
     }
 
     private fun startOutreach(){
         startPlayVideo()
-        speed = 6000
         topAnimation.setFloatValues(0f, outreachValue.toFloat(), 0f)
-        topAnimation.duration = speed
+        topAnimation.duration = 6000
         topAnimation.repeatCount = 19
         botAnimation.setFloatValues(0f, (outreachValue * -1).toFloat(), 0f)
-        botAnimation.duration = speed
+        botAnimation.duration = 6000
         botAnimation.repeatCount = 19
         topAnimation.start()
         botAnimation.start()
+        cruTopAnimation = topAnimation
+        cruBotAnimation = botAnimation
     }
 
     private fun startFlexible(){
         startPlayVideo()
+        topAnimation.setFloatValues(*getFlexibleTopAnimationValues())
+        topAnimation.duration = 144000
+        topAnimation.startDelay = 800
+        botAnimation.setFloatValues(*getFlexibleBotAnimationValues())
+        botAnimation.duration = 144000
+        botAnimation.startDelay = 800
+        topAnimation.start()
+        botAnimation.start()
+        cruTopAnimation = topAnimation
+        cruBotAnimation = botAnimation
+    }
+
+    private fun startLimit(){
+        startPlayVideo()
+        topAnimation.setFloatValues(
+            0f,
+            (convergenceValue * -1).toFloat(),
+            0f,
+            outreachValue.toFloat(),
+            0f
+        )
+        topAnimation.duration = 16000
+        topAnimation.repeatCount = 10
+        botAnimation.setFloatValues(
+            0f,
+            outreachValue.toFloat(),
+            0f,
+            (convergenceValue * -1).toFloat(),
+            0f
+        )
+        botAnimation.duration = 16000
+        botAnimation.repeatCount = 10
+        topAnimation.start()
+        botAnimation.start()
+        cruTopAnimation = topAnimation
+        cruBotAnimation = botAnimation
+    }
+
+    private fun startjijilingji(){
+        startPlayVideo()
+        val animator1 = ObjectAnimator.ofFloat(videoPlayerTop!!, "translationX", 0f,
+            (convergenceValue * -1).toFloat(),
+            0f,
+            outreachValue.toFloat(),
+            0f)
+        animator1.duration = 16000
+        animator1.repeatCount = 20
+        val animator11 = ObjectAnimator.ofFloat(videoPlayerTop!!, "translationX", 0f,
+            (convergenceValue * -1).toFloat(),
+            0f,
+            outreachValue.toFloat(),
+            0f)
+        animator11.duration = 16000
+        animator11.repeatCount = 10
+        val animator2 = ObjectAnimator.ofFloat(videoPlayerTop!!, "translationX", *getFlexibleTopAnimationValues())
+        animator2.duration = 144000
+        animator2.startDelay = 800
+        topAnimationSet.playSequentially(animator1, animator2, animator11)
+        val animator3 = ObjectAnimator.ofFloat(videoPlayerBot!!, "translationX", 0f,
+            outreachValue.toFloat(),
+            0f,
+            (convergenceValue * -1).toFloat(),
+            0f)
+        animator3.duration = 16000
+        animator3.repeatCount = 20
+        val animator33 = ObjectAnimator.ofFloat(videoPlayerBot!!, "translationX", 0f,
+            outreachValue.toFloat(),
+            0f,
+            (convergenceValue * -1).toFloat(),
+            0f)
+        animator33.duration = 16000
+        animator33.repeatCount = 10
+        val animator4 = ObjectAnimator.ofFloat(videoPlayerBot!!, "translationX", *getFlexibleBotAnimationValues())
+        animator4.duration = 144000
+        animator4.startDelay = 800
+        botAnimationSet.playSequentially(animator3, animator4, animator33)
+        topAnimationSet.start()
+        botAnimationSet.start()
+        cruTopAnimation = animator1
+        cruBotAnimation = animator3
+    }
+
+    private fun startwaiwaiwailing(){
+        startPlayVideo()
+        val animator1 = ObjectAnimator.ofFloat(videoPlayerTop!!, "translationX", 0f, outreachValue.toFloat(), 0f)
+        animator1.duration = 6000
+        animator1.repeatCount = 57
+        val animator2 = ObjectAnimator.ofFloat(videoPlayerTop!!, "translationX", *getFlexibleTopAnimationValues())
+        animator2.duration = 144000
+        animator2.startDelay = 800
+        topAnimationSet.playSequentially(animator1, animator2)
+        val animator3 = ObjectAnimator.ofFloat(videoPlayerBot!!, "translationX", 0f, (outreachValue * -1).toFloat(), 0f)
+        animator3.duration = 6000
+        animator3.repeatCount = 57
+        val animator4 = ObjectAnimator.ofFloat(videoPlayerBot!!, "translationX", *getFlexibleBotAnimationValues())
+        animator4.duration = 144000
+        animator4.startDelay = 800
+        botAnimationSet.playSequentially(animator3, animator4)
+        topAnimationSet.start()
+        botAnimationSet.start()
+        cruTopAnimation = animator1
+        cruBotAnimation = animator3
+    }
+
+    private fun startwaiwailingji(){
+        startPlayVideo()
+        val animator1 = ObjectAnimator.ofFloat(videoPlayerTop!!, "translationX", 0f, outreachValue.toFloat(), 0f)
+        animator1.duration = 6000
+        animator1.repeatCount = 38
+        val animator2 = ObjectAnimator.ofFloat(videoPlayerTop!!, "translationX", *getFlexibleTopAnimationValues())
+        animator2.duration = 144000
+        animator2.startDelay = 800
+        val animator11 = ObjectAnimator.ofFloat(videoPlayerTop!!, "translationX", 0f,
+            (convergenceValue * -1).toFloat(),
+            0f,
+            outreachValue.toFloat(),
+            0f)
+        animator11.duration = 16000
+        animator11.repeatCount = 10
+        topAnimationSet.playSequentially(animator1, animator2, animator11)
+        val animator3 = ObjectAnimator.ofFloat(videoPlayerBot!!, "translationX", 0f, (outreachValue * -1).toFloat(), 0f)
+        animator3.duration = 6000
+        animator3.repeatCount = 38
+        val animator4 = ObjectAnimator.ofFloat(videoPlayerBot!!, "translationX", *getFlexibleBotAnimationValues())
+        animator4.duration = 144000
+        animator4.startDelay = 800
+        val animator33 = ObjectAnimator.ofFloat(videoPlayerBot!!, "translationX", 0f,
+            outreachValue.toFloat(),
+            0f,
+            (convergenceValue * -1).toFloat(),
+            0f)
+        animator33.duration = 16000
+        animator33.repeatCount = 10
+        botAnimationSet.playSequentially(animator3, animator4, animator33)
+        topAnimationSet.start()
+        botAnimationSet.start()
+        cruTopAnimation = animator1
+        cruBotAnimation = animator3
+    }
+
+    private fun starthuihuilingji(){
+        startPlayVideo()
+        val animator1 = ObjectAnimator.ofFloat(videoPlayerTop!!, "translationX", 0f, (convergenceValue * -1).toFloat(), 0f)
+        animator1.duration = 10000
+        animator1.repeatCount = 30
+        val animator2 = ObjectAnimator.ofFloat(videoPlayerTop!!, "translationX", *getFlexibleTopAnimationValues())
+        animator2.duration = 144000
+        animator2.startDelay = 800
+        val animator11 = ObjectAnimator.ofFloat(videoPlayerTop!!, "translationX", 0f,
+            (convergenceValue * -1).toFloat(),
+            0f,
+            outreachValue.toFloat(),
+            0f)
+        animator11.duration = 16000
+        animator11.repeatCount = 10
+        topAnimationSet.playSequentially(animator1, animator2, animator11)
+        val animator3 = ObjectAnimator.ofFloat(videoPlayerBot!!, "translationX", 0f, convergenceValue.toFloat(), 0f)
+        animator3.duration = 10000
+        animator3.repeatCount = 30
+        val animator4 = ObjectAnimator.ofFloat(videoPlayerBot!!, "translationX", *getFlexibleBotAnimationValues())
+        animator4.duration = 144000
+        animator4.startDelay = 800
+        val animator33 = ObjectAnimator.ofFloat(videoPlayerBot!!, "translationX", 0f,
+            outreachValue.toFloat(),
+            0f,
+            (convergenceValue * -1).toFloat(),
+            0f)
+        animator33.duration = 16000
+        animator33.repeatCount = 10
+        botAnimationSet.playSequentially(animator3, animator4, animator33)
+        topAnimationSet.start()
+        botAnimationSet.start()
+        cruTopAnimation = animator1
+        cruBotAnimation = animator3
+    }
+
+    private fun getFlexibleTopAnimationValues() : FloatArray {
         val valueList = FloatArray(1441)
         for (i in 0..1439){
             when (i) {
@@ -646,9 +897,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
         valueList[1440] = 0f
-        topAnimation.setFloatValues(*valueList)
-        topAnimation.duration = 144000
-        topAnimation.startDelay = 800
+        return valueList
+    }
+
+    private fun getFlexibleBotAnimationValues() : FloatArray {
+        val valueList = FloatArray(1441)
         for (i in 0..1439){
             when (i) {
                 in 0..320 -> {
@@ -674,42 +927,9 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-        botAnimation.setFloatValues(*valueList)
-        botAnimation.duration = 144000
-        botAnimation.startDelay = 800
-        topAnimation.start()
-        botAnimation.start()
+        valueList[1440] = 0f
+        return valueList
     }
-
-    private fun startLimit(){
-        startPlayVideo()
-        speed = 16000
-        topAnimation.setFloatValues(
-            0f,
-            (convergenceValue * -1).toFloat(),
-            0f,
-            outreachValue.toFloat(),
-            0f
-        )
-        topAnimation.duration = speed
-        topAnimation.repeatCount = 10
-        botAnimation.setFloatValues(
-            0f,
-            outreachValue.toFloat(),
-            0f,
-            (convergenceValue * -1).toFloat(),
-            0f
-        )
-        botAnimation.duration = speed
-        botAnimation.repeatCount = 10
-        topAnimation.start()
-        botAnimation.start()
-    }
-
-
-
-
-
 
     private fun getBitmap(name: String): Bitmap? {
         return BitmapFactory.decodeFile(PATH + name)

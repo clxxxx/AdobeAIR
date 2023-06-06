@@ -5,7 +5,7 @@ import android.animation.*
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.os.Build
+import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.text.TextUtils
@@ -14,10 +14,9 @@ import android.view.View
 import android.view.animation.LinearInterpolator
 import android.widget.Button
 import android.widget.TextView
-import androidx.annotation.RequiresApi
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.animation.addListener
 import androidx.core.content.ContextCompat
 import com.gyf.immersionbar.BarHide
 import com.gyf.immersionbar.ImmersionBar
@@ -29,6 +28,10 @@ import io.realm.kotlin.createObject
 import io.realm.kotlin.where
 import xyz.doikki.videoplayer.player.VideoView
 import java.io.File
+import java.io.FileInputStream
+import java.io.FileWriter
+import java.io.IOException
+import java.util.*
 import kotlin.system.exitProcess
 
 
@@ -138,6 +141,7 @@ class MainActivity : AppCompatActivity() {
         addImg = findViewById(R.id.add_img)
         addImg?.setOnClickListener {
             if (!swapping!!.isEnabled){
+                if(imgListPath1.size <= 0) return@setOnClickListener
                 img1Position = 0
                 swapping?.isEnabled = true
                 videoPlayerTop?.setImgSrc(getBitmap(imgListPath1[img1Position]))
@@ -152,6 +156,7 @@ class MainActivity : AppCompatActivity() {
         }
         binocularVision = findViewById(R.id.binocular_vision)
         binocularVision?.setOnClickListener {
+            if(imgListPath1.size <= 0) return@setOnClickListener
             videoPlayerTop?.setImgSrc(getBitmap(imgListPath2[img2Position]))
             videoPlayerBot?.setImgSrc(getBitmap(imgListPath2[img2Position + 1]))
             img2Position += 2
@@ -201,6 +206,7 @@ class MainActivity : AppCompatActivity() {
                 value.convergence = convergenceValue
                 value.outreach = outreachValue
                 value.setTime = System.currentTimeMillis()
+                mSetValue = value
                 u!!.videoName = videoPath
                 u.setValues.add(value)
             }
@@ -253,7 +259,7 @@ class MainActivity : AppCompatActivity() {
         }
         accelerate = findViewById(R.id.accelerate)
         accelerate?.setOnClickListener {
-            Log.d("++++++++++",cruTopAnimation.duration.toString())
+            Log.d("++++++++++", cruTopAnimation.duration.toString())
             var speed = cruTopAnimation.duration
             if (speed > 500) {
                 speed -= 500
@@ -321,7 +327,7 @@ class MainActivity : AppCompatActivity() {
         }
         moderate = findViewById(R.id.moderate)
         moderate?.setOnClickListener {
-            Log.d("++++++++++",cruTopAnimation.duration.toString())
+            Log.d("++++++++++", cruTopAnimation.duration.toString())
             var speed = cruTopAnimation.duration
             speed += 500
             cruTopAnimation.duration = speed
@@ -354,31 +360,6 @@ class MainActivity : AppCompatActivity() {
                 u!!.videoProgress = videoPlayerTop?.player!!.currentPosition
             }
         }
-        PermissionX.init(this)
-            .permissions(
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.READ_EXTERNAL_STORAGE
-            )
-            .request { allGranted, _, _ ->
-                if (!allGranted) {
-                    exitForce()
-                } else {
-                    val opt = File(PATH)
-                    if (!opt.exists()) {
-                        opt.mkdir()
-                        val sys = File(opt.absolutePath, "sys")
-                        sys.mkdir()
-                        val systemImage = File(opt.absolutePath, "systemImage")
-                        systemImage.mkdir()
-                        val video = File(opt.absolutePath, "video")
-                        video.mkdir()
-                        val videoImage = File(opt.absolutePath, "videoImage")
-                        videoImage.mkdir()
-                    } else {
-                        getAllImgPath()
-                    }
-                }
-            }
 
         videoPlayerTop = findViewById(R.id.video_top)
         videoPlayerBot = findViewById(R.id.video_bot)
@@ -411,10 +392,50 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         })
+        if(!FileMgrUtils.isExternalStorageManager()) {
+            startActivityForResult(FileMgrUtils.createFileManagerPermissionIntent(this), 300)
+        }else{
+            requestWriteExternalStorage()
+        }
+    }
+
+    private fun requestWriteExternalStorage(){
+        PermissionX.init(this)
+            .permissions(
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            )
+            .request { allGranted, _, _ ->
+                if (!allGranted) {
+                    exitForce()
+                } else {
+                    val opt = File(PATH)
+                    if (!opt.exists()) {
+                        opt.mkdir()
+                        val sys = File(opt.absolutePath, "sys")
+                        sys.mkdir()
+                        val systemImage = File(opt.absolutePath, "systemImage")
+                        systemImage.mkdir()
+                        val video = File(opt.absolutePath, "video")
+                        video.mkdir()
+                        val videoImage = File(opt.absolutePath, "videoImage")
+                        videoImage.mkdir()
+                    } else {
+                        getAllImgPath()
+                    }
+                }
+            }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 300) {
+            if(FileMgrUtils.isExternalStorageManager()){
+                requestWriteExternalStorage()
+            }else{
+                exitForce()
+            }
+        }
         if (resultCode == RESULT_OK) {
             when (requestCode) {
                 100 -> {
@@ -733,39 +754,55 @@ class MainActivity : AppCompatActivity() {
 
     private fun startjijilingji(){
         startPlayVideo()
-        val animator1 = ObjectAnimator.ofFloat(videoPlayerTop!!, "translationX", 0f,
+        val animator1 = ObjectAnimator.ofFloat(
+            videoPlayerTop!!, "translationX", 0f,
             (convergenceValue * -1).toFloat(),
             0f,
             outreachValue.toFloat(),
-            0f)
+            0f
+        )
         animator1.duration = 16000
         animator1.repeatCount = 20
-        val animator11 = ObjectAnimator.ofFloat(videoPlayerTop!!, "translationX", 0f,
+        val animator11 = ObjectAnimator.ofFloat(
+            videoPlayerTop!!, "translationX", 0f,
             (convergenceValue * -1).toFloat(),
             0f,
             outreachValue.toFloat(),
-            0f)
+            0f
+        )
         animator11.duration = 16000
         animator11.repeatCount = 10
-        val animator2 = ObjectAnimator.ofFloat(videoPlayerTop!!, "translationX", *getFlexibleTopAnimationValues())
+        val animator2 = ObjectAnimator.ofFloat(
+            videoPlayerTop!!,
+            "translationX",
+            *getFlexibleTopAnimationValues()
+        )
         animator2.duration = 144000
         animator2.startDelay = 800
         topAnimationSet.playSequentially(animator1, animator2, animator11)
-        val animator3 = ObjectAnimator.ofFloat(videoPlayerBot!!, "translationX", 0f,
+        val animator3 = ObjectAnimator.ofFloat(
+            videoPlayerBot!!, "translationX", 0f,
             outreachValue.toFloat(),
             0f,
             (convergenceValue * -1).toFloat(),
-            0f)
+            0f
+        )
         animator3.duration = 16000
         animator3.repeatCount = 20
-        val animator33 = ObjectAnimator.ofFloat(videoPlayerBot!!, "translationX", 0f,
+        val animator33 = ObjectAnimator.ofFloat(
+            videoPlayerBot!!, "translationX", 0f,
             outreachValue.toFloat(),
             0f,
             (convergenceValue * -1).toFloat(),
-            0f)
+            0f
+        )
         animator33.duration = 16000
         animator33.repeatCount = 10
-        val animator4 = ObjectAnimator.ofFloat(videoPlayerBot!!, "translationX", *getFlexibleBotAnimationValues())
+        val animator4 = ObjectAnimator.ofFloat(
+            videoPlayerBot!!,
+            "translationX",
+            *getFlexibleBotAnimationValues()
+        )
         animator4.duration = 144000
         animator4.startDelay = 800
         botAnimationSet.playSequentially(animator3, animator4, animator33)
@@ -777,17 +814,37 @@ class MainActivity : AppCompatActivity() {
 
     private fun startwaiwaiwailing(){
         startPlayVideo()
-        val animator1 = ObjectAnimator.ofFloat(videoPlayerTop!!, "translationX", 0f, outreachValue.toFloat(), 0f)
+        val animator1 = ObjectAnimator.ofFloat(
+            videoPlayerTop!!,
+            "translationX",
+            0f,
+            outreachValue.toFloat(),
+            0f
+        )
         animator1.duration = 6000
         animator1.repeatCount = 57
-        val animator2 = ObjectAnimator.ofFloat(videoPlayerTop!!, "translationX", *getFlexibleTopAnimationValues())
+        val animator2 = ObjectAnimator.ofFloat(
+            videoPlayerTop!!,
+            "translationX",
+            *getFlexibleTopAnimationValues()
+        )
         animator2.duration = 144000
         animator2.startDelay = 800
         topAnimationSet.playSequentially(animator1, animator2)
-        val animator3 = ObjectAnimator.ofFloat(videoPlayerBot!!, "translationX", 0f, (outreachValue * -1).toFloat(), 0f)
+        val animator3 = ObjectAnimator.ofFloat(
+            videoPlayerBot!!,
+            "translationX",
+            0f,
+            (outreachValue * -1).toFloat(),
+            0f
+        )
         animator3.duration = 6000
         animator3.repeatCount = 57
-        val animator4 = ObjectAnimator.ofFloat(videoPlayerBot!!, "translationX", *getFlexibleBotAnimationValues())
+        val animator4 = ObjectAnimator.ofFloat(
+            videoPlayerBot!!,
+            "translationX",
+            *getFlexibleBotAnimationValues()
+        )
         animator4.duration = 144000
         animator4.startDelay = 800
         botAnimationSet.playSequentially(animator3, animator4)
@@ -799,31 +856,55 @@ class MainActivity : AppCompatActivity() {
 
     private fun startwaiwailingji(){
         startPlayVideo()
-        val animator1 = ObjectAnimator.ofFloat(videoPlayerTop!!, "translationX", 0f, outreachValue.toFloat(), 0f)
+        val animator1 = ObjectAnimator.ofFloat(
+            videoPlayerTop!!,
+            "translationX",
+            0f,
+            outreachValue.toFloat(),
+            0f
+        )
         animator1.duration = 6000
         animator1.repeatCount = 38
-        val animator2 = ObjectAnimator.ofFloat(videoPlayerTop!!, "translationX", *getFlexibleTopAnimationValues())
+        val animator2 = ObjectAnimator.ofFloat(
+            videoPlayerTop!!,
+            "translationX",
+            *getFlexibleTopAnimationValues()
+        )
         animator2.duration = 144000
         animator2.startDelay = 800
-        val animator11 = ObjectAnimator.ofFloat(videoPlayerTop!!, "translationX", 0f,
+        val animator11 = ObjectAnimator.ofFloat(
+            videoPlayerTop!!, "translationX", 0f,
             (convergenceValue * -1).toFloat(),
             0f,
             outreachValue.toFloat(),
-            0f)
+            0f
+        )
         animator11.duration = 16000
         animator11.repeatCount = 10
         topAnimationSet.playSequentially(animator1, animator2, animator11)
-        val animator3 = ObjectAnimator.ofFloat(videoPlayerBot!!, "translationX", 0f, (outreachValue * -1).toFloat(), 0f)
+        val animator3 = ObjectAnimator.ofFloat(
+            videoPlayerBot!!,
+            "translationX",
+            0f,
+            (outreachValue * -1).toFloat(),
+            0f
+        )
         animator3.duration = 6000
         animator3.repeatCount = 38
-        val animator4 = ObjectAnimator.ofFloat(videoPlayerBot!!, "translationX", *getFlexibleBotAnimationValues())
+        val animator4 = ObjectAnimator.ofFloat(
+            videoPlayerBot!!,
+            "translationX",
+            *getFlexibleBotAnimationValues()
+        )
         animator4.duration = 144000
         animator4.startDelay = 800
-        val animator33 = ObjectAnimator.ofFloat(videoPlayerBot!!, "translationX", 0f,
+        val animator33 = ObjectAnimator.ofFloat(
+            videoPlayerBot!!, "translationX", 0f,
             outreachValue.toFloat(),
             0f,
             (convergenceValue * -1).toFloat(),
-            0f)
+            0f
+        )
         animator33.duration = 16000
         animator33.repeatCount = 10
         botAnimationSet.playSequentially(animator3, animator4, animator33)
@@ -835,31 +916,55 @@ class MainActivity : AppCompatActivity() {
 
     private fun starthuihuilingji(){
         startPlayVideo()
-        val animator1 = ObjectAnimator.ofFloat(videoPlayerTop!!, "translationX", 0f, (convergenceValue * -1).toFloat(), 0f)
+        val animator1 = ObjectAnimator.ofFloat(
+            videoPlayerTop!!,
+            "translationX",
+            0f,
+            (convergenceValue * -1).toFloat(),
+            0f
+        )
         animator1.duration = 10000
         animator1.repeatCount = 30
-        val animator2 = ObjectAnimator.ofFloat(videoPlayerTop!!, "translationX", *getFlexibleTopAnimationValues())
+        val animator2 = ObjectAnimator.ofFloat(
+            videoPlayerTop!!,
+            "translationX",
+            *getFlexibleTopAnimationValues()
+        )
         animator2.duration = 144000
         animator2.startDelay = 800
-        val animator11 = ObjectAnimator.ofFloat(videoPlayerTop!!, "translationX", 0f,
+        val animator11 = ObjectAnimator.ofFloat(
+            videoPlayerTop!!, "translationX", 0f,
             (convergenceValue * -1).toFloat(),
             0f,
             outreachValue.toFloat(),
-            0f)
+            0f
+        )
         animator11.duration = 16000
         animator11.repeatCount = 10
         topAnimationSet.playSequentially(animator1, animator2, animator11)
-        val animator3 = ObjectAnimator.ofFloat(videoPlayerBot!!, "translationX", 0f, convergenceValue.toFloat(), 0f)
+        val animator3 = ObjectAnimator.ofFloat(
+            videoPlayerBot!!,
+            "translationX",
+            0f,
+            convergenceValue.toFloat(),
+            0f
+        )
         animator3.duration = 10000
         animator3.repeatCount = 30
-        val animator4 = ObjectAnimator.ofFloat(videoPlayerBot!!, "translationX", *getFlexibleBotAnimationValues())
+        val animator4 = ObjectAnimator.ofFloat(
+            videoPlayerBot!!,
+            "translationX",
+            *getFlexibleBotAnimationValues()
+        )
         animator4.duration = 144000
         animator4.startDelay = 800
-        val animator33 = ObjectAnimator.ofFloat(videoPlayerBot!!, "translationX", 0f,
+        val animator33 = ObjectAnimator.ofFloat(
+            videoPlayerBot!!, "translationX", 0f,
             outreachValue.toFloat(),
             0f,
             (convergenceValue * -1).toFloat(),
-            0f)
+            0f
+        )
         animator33.duration = 16000
         animator33.repeatCount = 10
         botAnimationSet.playSequentially(animator3, animator4, animator33)
@@ -957,12 +1062,41 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun writeNumberUses() {
+        val file = File(Environment.getExternalStorageDirectory().path + "/Adobe", "times.txt")
+        try {
+            if (!file.exists()) {
+                val parentFile = File(file.parent)
+                parentFile.mkdirs()
+                file.createNewFile()
+            }
+            if (file.exists()) {
+                val fis = FileInputStream(file)
+                val length = fis.available()
+                val buffer = ByteArray(length)
+                fis.read(buffer)
+                var times = 0
+                if (buffer.isNotEmpty()){
+                    times = buffer[0].toInt() and 0xff - 48
+                }
+                if (times == 9){
+                    exitForce()
+                } else {
+                    times++
+                    val fileWriter = FileWriter(file, false)
+                    fileWriter.write(times.toString())
+                    fileWriter.flush()
+                    fileWriter.close()
+                }
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+            exitForce()
+        }
+    }
+
     private fun exitForce() {
         finish()
         exitProcess(0)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
     }
 }

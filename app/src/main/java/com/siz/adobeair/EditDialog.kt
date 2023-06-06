@@ -1,17 +1,13 @@
 package com.siz.adobeair
 
-import android.app.Activity
 import android.app.Dialog
 import android.content.Context
-import android.content.DialogInterface
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import com.gyf.immersionbar.BarHide
-import com.gyf.immersionbar.ImmersionBar
 
 /**
  *

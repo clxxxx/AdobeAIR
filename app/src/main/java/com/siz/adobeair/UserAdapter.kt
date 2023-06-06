@@ -16,9 +16,7 @@ class UserAdapter : BaseQuickAdapter<User, BaseViewHolder>(R.layout.item_user) {
 
     override fun convert(helper: BaseViewHolder, item: User) {
         var userInfo = item.name
-        Log.d("+++++",item.videoProgress.toString())
         if (item.videoProgress > 0 && !TextUtils.isEmpty(item.videoName)){
-            Log.d("+++++",item.videoName.toString())
             userInfo = "$userInfo  (上次记录：${item.videoName!!.substring(item.videoName!!.lastIndexOf("/")+1,
                 item.videoName!!.indexOf("."))}   ${formatTime(item.videoProgress / 1000 )})"
         }

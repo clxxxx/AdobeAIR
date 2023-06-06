@@ -19,7 +19,7 @@ class AdobeAIRApplication : Application() {
         super.onCreate()
         Realm.init(this)
         val configuration = RealmConfiguration.Builder().allowQueriesOnUiThread(true)
-            .allowWritesOnUiThread(true).name("test.realm").build()
+            .allowWritesOnUiThread(true).name("AdobeAIR.realm").build()
         Realm.setDefaultConfiguration(configuration)
 
         //播放器配置，注意：此为全局配置，按需开启

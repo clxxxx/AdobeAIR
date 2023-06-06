@@ -11,8 +11,6 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.gyf.immersionbar.BarHide
@@ -32,6 +30,7 @@ open class UserListActivity : AppCompatActivity() {
 
     private lateinit var realm: Realm
 
+    private var topLayout: LinearLayout? =null
     private var info : LinearLayout? =null
     private var register : Button? =null
     private var createGroup : Button? =null
@@ -44,16 +43,6 @@ open class UserListActivity : AppCompatActivity() {
     private var userGroupList = mutableListOf<UserGroup>()
     private var userList = mutableListOf<User>()
 
-    /**
-     * 记录便签的初始位置
-     */
-    private val startLocal = IntArray(2)
-
-    /**
-     * 记录便签的初始位置（用于计算移动距离，判断是否为点击）
-     */
-    private val startY2 = 0
-
     private var imm: InputMethodManager? = null
 
     @SuppressLint("ClickableViewAccessibility")
@@ -63,6 +52,7 @@ open class UserListActivity : AppCompatActivity() {
         ImmersionBar.with(this).hideBar(BarHide.FLAG_HIDE_STATUS_BAR).init()
         imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         info = findViewById(R.id.info)
+        topLayout = findViewById(R.id.top)
         userGroup = findViewById(R.id.user_group)
         userName = findViewById(R.id.user_name)
         userGroup.layoutManager = LinearLayoutManager(this)
@@ -84,35 +74,53 @@ open class UserListActivity : AppCompatActivity() {
             setResult(RESULT_OK, intent)
             finish()
         }
-//        userAdapter.setOnItemLongClickListener{ _, _, position ->
-//            userName?.text = userList[position].name
-//            userName?.visibility = View.VISIBLE
-//            info?.setOnTouchListener { _, motionEvent ->
-//                when (motionEvent.action){
-//                    MotionEvent.ACTION_DOWN -> {
-//                        startLocal[0] = motionEvent.rawX.toInt()
-//                        startLocal[1] = motionEvent.rawY.toInt()
-//                    }
-//                    MotionEvent.ACTION_MOVE -> {
-//                        val newLocal = IntArray(2)
-//                        newLocal[0] = motionEvent.rawX.toInt()
-//                        newLocal[1] = motionEvent.rawY.toInt()
-//                        userName?.layout(motionEvent.rawX.toInt()-(userName?.width!! / 2),
-//                            motionEvent.rawY.toInt()-(userName?.height!! / 2),
-//                            motionEvent.rawX.toInt()+(userName?.width!! / 2),
-//                            motionEvent.rawY.toInt()+(userName?.height!! / 2),)
-//
-//                    }
-//                    MotionEvent.ACTION_UP -> {
-//
-//                    }
-//                }
-//                return@setOnTouchListener true
-//            }
-//            return@setOnItemLongClickListener true
-//        }
-        val itemTouchHelper = ItemTouchHelper(MyItemTouchHelperCallBack())
-        itemTouchHelper.attachToRecyclerView(users)
+        userAdapter.setOnItemLongClickListener{ _, _, position ->
+            if (register?.isEnabled!!) return@setOnItemLongClickListener false
+            userName?.text = userList[position].name
+            val id = userList[position].id
+            users.setOnTouchListener { _, motionEvent ->
+                when (motionEvent.action){
+                    MotionEvent.ACTION_MOVE -> {
+                        userName?.visibility = View.VISIBLE
+                        userName?.layout(
+                            motionEvent.rawX.toInt() - (userName?.width!! / 2),
+                            motionEvent.rawY.toInt() - (userName?.height!! / 2),
+                            motionEvent.rawX.toInt() + (userName?.width!! / 2),
+                            motionEvent.rawY.toInt() + (userName?.height!! / 2),
+                        )
+                        if (motionEvent.rawX.toInt() <= userGroup.right &&
+                            motionEvent.rawY.toInt() >= userGroup.top + topLayout!!.bottom &&
+                            motionEvent.rawY.toInt() <= userGroup.bottom + topLayout!!.bottom){
+                            val height = userGroupAdapter.getViewByPosition(0, R.id.group_name)?.bottom!! -
+                                    userGroupAdapter.getViewByPosition(0, R.id.group_name)?.top!!
+                            for (i in 0 until userGroupList.size){
+                                if (motionEvent.rawX.toInt() <= userGroup.right &&
+                                    motionEvent.rawY.toInt() >= i*height + topLayout!!.bottom &&
+                                    motionEvent.rawY.toInt() <= (i+1)*height + topLayout!!.bottom){
+                                    userGroupAdapter.getViewByPosition(userGroupAdapter.selectedGroup, R.id.group_name)?.isSelected = false
+                                    userGroupAdapter.selectedGroup = i
+                                    userGroupAdapter.getViewByPosition(i, R.id.group_name)?.isSelected = true
+                                }
+                            }
+                        }
+                    }
+                    MotionEvent.ACTION_UP -> {
+                        userName?.visibility = View.GONE
+                        val groupId = userGroupList[userGroupAdapter.selectedGroup].id
+                        realm.executeTransaction { realm ->
+                            val user = realm.where<User>().equalTo("id", id).findFirst()
+                            user!!.groupId = groupId
+                        }
+                        findUsersByGroup(groupId)
+                        userGroupAdapter.selectedGroup = userGroupAdapter.selectedGroup
+                        userGroupAdapter.notifyDataSetChanged()
+                        users.setOnTouchListener(null)
+                    }
+                }
+                return@setOnTouchListener false
+            }
+            return@setOnItemLongClickListener true
+        }
         register = findViewById(R.id.register)
         register?.setOnClickListener {
             val editDialog = EditDialog(this, "请输入用户名")

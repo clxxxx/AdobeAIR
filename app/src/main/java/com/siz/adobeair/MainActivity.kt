@@ -2,14 +2,13 @@ package com.siz.adobeair
 
 import android.Manifest
 import android.animation.*
-import android.annotation.SuppressLint
-import android.content.Context
 import android.content.Intent
+import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.os.Environment
-import android.os.storage.StorageManager
+import android.provider.MediaStore
 import android.text.TextUtils
 import android.util.Log
 import android.view.View
@@ -32,7 +31,6 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileWriter
 import java.io.IOException
-import java.lang.reflect.InvocationTargetException
 import java.util.*
 import kotlin.system.exitProcess
 
@@ -419,7 +417,7 @@ class MainActivity : AppCompatActivity() {
                         return@request
                     }
                     val exPath = getTfStoragePath()
-                    if(TextUtils.isEmpty(exPath)){
+                    if(!TextUtils.isEmpty(exPath)){
                         PATH = "$exPath/OPT"
                     }
                     val opt = File(PATH)
@@ -1128,51 +1126,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun getTfStoragePath(): String {
         var exPath = ""
-        val storageManager = getSystemService(STORAGE_SERVICE) as StorageManager
-        try {
-            val paramClasses = arrayOf<Class<*>>()
-            val getVolumeList =
-                StorageManager::class.java.getMethod("getVolumeList", *paramClasses)
-            getVolumeList.isAccessible = true
-            val params = arrayOf<Any>()
-            val invokes = getVolumeList.invoke(storageManager, *params) as Array<Any>
-            if (null != invokes) {
-                for (i in invokes.indices) {
-                    val obj = invokes[i]
-                    val getPath = obj.javaClass.getMethod("getPath", *arrayOfNulls(0))
-                    val path = getPath.invoke(obj, *arrayOfNulls(0)) as String
-                    Log.e("++++++++++", "usbpath e $path")
-                    val file = File(path)
-                    if (file.exists() && file.isDirectory && file.canWrite()) {
-                        val isRemovable = obj.javaClass.getMethod("isRemovable", *arrayOfNulls(0))
-                        var state: String? = null
-                        try {
-                            val getVolumeState =
-                                StorageManager::class.java.getMethod(
-                                    "getVolumeState",
-                                    String::class.java
-                                )
-                            state = getVolumeState.invoke(storageManager, path) as String
-                            Log.e("++++++++++", "usbpath e $state")
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                        }
-                        if ("mounted" == state) {
-                            val isRemoveable: Boolean = (isRemovable.invoke(obj, *arrayOfNulls(0)) as Boolean)
-                            if (isRemoveable) {
-                                exPath = path
-                            }
-                            Log.e("++++++++++", "usbpath e $isRemoveable")
-                        }
-                    }
-                }
+        val cursor = contentResolver.query(MediaStore.Files.getContentUri("external"), null, null, null, null)
+        while (cursor!!.moveToNext()) {
+            val path: String = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATA))
+            if (path.indexOf("emulated") == -1){
+                exPath = path
+                cursor.close()
+                return exPath
             }
-        } catch (e: NoSuchMethodException) {
-            e.printStackTrace()
-        } catch (e: InvocationTargetException) {
-            e.printStackTrace()
-        } catch (e: IllegalAccessException) {
-            e.printStackTrace()
         }
         return exPath
     }

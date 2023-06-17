@@ -132,6 +132,7 @@ open class UserListActivity : AppCompatActivity() {
                             return
                         }
                         hiddenKeyboard(editDialog.getEditText())
+                        editDialog.getEditText().clearFocus()
                         realm.executeTransaction { realm ->
                             val user = realm.createObject<User>(userList.size)
                             user.name = editText

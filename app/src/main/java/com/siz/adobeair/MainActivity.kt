@@ -412,30 +412,34 @@ class MainActivity : AppCompatActivity() {
                 if (!allGranted) {
                     exitForce()
                 } else {
+                    initFilePath()
                     if (!getRegisterState()){
                         RegisterDialog(this).show()
                         return@request
                     }
-                    val exPath = getTfStoragePath()
-                    if(!TextUtils.isEmpty(exPath)){
-                        PATH = "$exPath/OPT"
-                    }
-                    val opt = File(PATH)
-                    if (!opt.exists()) {
-                        opt.mkdir()
-                        val sys = File(opt.absolutePath, "sys")
-                        sys.mkdir()
-                        val systemImage = File(opt.absolutePath, "systemImage")
-                        systemImage.mkdir()
-                        val video = File(opt.absolutePath, "video")
-                        video.mkdir()
-                        val videoImage = File(opt.absolutePath, "videoImage")
-                        videoImage.mkdir()
-                    } else {
-                        getAllImgPath()
-                    }
                 }
             }
+    }
+
+    private fun initFilePath(){
+        val exPath = getTfStoragePath()
+        if(!TextUtils.isEmpty(exPath)){
+            PATH = "$exPath/OPT"
+        }
+        val opt = File(PATH)
+        if (!opt.exists()) {
+            opt.mkdir()
+            val sys = File(opt.absolutePath, "sys")
+            sys.mkdir()
+            val systemImage = File(opt.absolutePath, "systemImage")
+            systemImage.mkdir()
+            val video = File(opt.absolutePath, "video")
+            video.mkdir()
+            val videoImage = File(opt.absolutePath, "videoImage")
+            videoImage.mkdir()
+        } else {
+            getAllImgPath()
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

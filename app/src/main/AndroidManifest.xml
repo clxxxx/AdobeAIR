@@ -42,8 +42,9 @@
             android:configChanges="orientation|keyboardHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
+                <category android:name="android.intent.category.HOME" />
                 <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
         <activity android:name=".MainActivity"
@@ -52,7 +53,7 @@
             android:configChanges="orientation|keyboardHidden"/>
         <activity android:name=".UserListActivity"
             android:screenOrientation="landscape"
-            android:windowSoftInputMode="adjustUnspecified|stateHidden"
+            android:windowSoftInputMode="adjustPan"
             android:configChanges="orientation|keyboardHidden"/>
         <activity android:name=".ValueRecordActivity"
             android:screenOrientation="landscape"
@@ -62,6 +63,16 @@
             android:screenOrientation="landscape"
             android:windowSoftInputMode="adjustUnspecified|stateHidden"
             android:configChanges="orientation|keyboardHidden"/>
+
+        <receiver android:name=".SdcardReceiver" android:enabled="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_EJECT" />
+                <action android:name="android.intent.action.MEDIA_MOUNTED" />
+                <action android:name="android.intent.action.MEDIA_UNMOUNTED" />
+                <data android:scheme="file" />
+            </intent-filter>
+
+        </receiver>
     </application>
 
 </manifest>
